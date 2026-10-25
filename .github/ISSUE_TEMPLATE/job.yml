@@ -1,0 +1,37 @@
+name: New motion clone
+description: Copy the motion, camera and expressions of a video onto a character image (runs on Kaggle GPU).
+title: "Motion clone"
+labels: ["job"]
+body:
+  - type: textarea
+    id: video
+    attributes:
+      label: Driving video
+      description: Drag the video file here (mp4/mov). Full length, size, fps and audio are kept.
+    validations:
+      required: true
+  - type: textarea
+    id: image
+    attributes:
+      label: Character image
+      description: Drag the image here. Front face, waist-up works best.
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Prompt (optional)
+      description: Leave empty and a prompt is written for you from the image and the video.
+  - type: checkboxes
+    id: options
+    attributes:
+      label: Options
+      options:
+        - label: Meher canon (24 years old)
+        - label: Phone finish (sharpen + fine grain)
+        - label: Fast quality (4 steps instead of 6)
+  - type: input
+    id: seed
+    attributes:
+      label: Seed
+      placeholder: "7"

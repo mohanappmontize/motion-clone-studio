@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Motion clone studio</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--soft:#efeee9;--line:#dddbd3;--line2:#c4c1b6;--tx:#1d1d1b;--tx2:#5f5e5a;--tx3:#8a8880;--acc:#2f6fd0;--ok:#2f7a1f;--okbg:#e7f2dc;--bad:#b3332f;--run:#e6effb}
+@media (prefers-color-scheme:dark){:root{--bg:#171716;--card:#1f1f1e;--soft:#262624;--line:#363633;--line2:#4a4a46;--tx:#ecebe6;--tx2:#b4b2a9;--tx3:#888780;--acc:#6aa4f0;--ok:#8fcf6a;--okbg:#22331a;--bad:#f09595;--run:#1c2a3d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Ubuntu,sans-serif}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--card)}
+header b{font-size:16px;font-weight:600}header .sub{color:var(--tx2);font-size:12px}
+.pill{margin-left:auto;font-size:12px;padding:3px 10px;border-radius:8px;background:var(--okbg);color:var(--ok)}
+main{display:grid;grid-template-columns:290px minmax(0,1fr) 340px;min-height:calc(100vh - 52px)}
+@media (max-width:1000px){main{grid-template-columns:minmax(0,1fr)}section{border-right:0!important;border-bottom:1px solid var(--line)}}
+section{padding:16px;border-right:1px solid var(--line);min-width:0}section:last-child{border-right:0}
+.lab{color:var(--tx2);font-size:12px;margin:12px 0 4px}
+textarea,input[type=number]{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--line2);border-radius:8px;padding:7px;font:inherit;font-size:13px}
+textarea{height:84px;resize:vertical}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px;margin:8px 0}
+button,.btn{font:inherit;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--tx);padding:8px 12px;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.go{width:100%;margin-top:14px;background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:600}
+.note{font-size:12px;color:var(--tx2);margin-top:10px;line-height:1.6}
+.mid{background:var(--soft)}
+.nodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.node{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.node b{font-weight:600;font-size:13px}.node .d{color:var(--tx2);font-size:12px;min-height:18px;overflow-wrap:anywhere}
+.node.running{border-color:var(--acc);background:var(--run)}.node.done .s{color:var(--ok)}.node.failed{border-color:var(--bad)}.node.failed .s{color:var(--bad)}
+.node .s{font-size:12px;color:var(--tx3)}
+.bar{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}.bar i{display:block;height:4px;width:30%;background:var(--acc);animation:sl 1.4s infinite ease-in-out}
+@keyframes sl{0%{margin-left:-30%}100%{margin-left:100%}}
+.plan{font-size:12px;color:var(--tx2);margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+pre{font:11px/1.6 ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--tx2);height:220px;overflow:auto;white-space:pre-wrap;margin:0}
+.player{background:var(--soft);border:1px solid var(--line);border-radius:10px;min-height:300px;display:flex;align-items:center;justify-content:center;color:var(--tx3);text-align:center;padding:8px}
+.player video{width:100%;max-height:70vh;border-radius:10px;background:#000}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.met{background:var(--soft);border-radius:8px;padding:8px}.met span{display:block;color:var(--tx2);font-size:11px}.met b{font-size:18px;font-weight:600}
+.row{display:flex;gap:8px;margin-top:10px}.row>*{flex:1}
+.hist{font-size:12px}.hist a{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);color:var(--tx);text-decoration:none}
+.hist a:hover,.hist a.on{color:var(--acc)}
+</style></head><body>
+<header><b>Motion clone studio</b><span class="sub">GitHub page · runs on Kaggle GPU (T4) · Wan Animate 14B</span><span class="pill" id="state">ready</span></header>
+<main>
+<section>
+  <div class="lab" style="margin-top:0">New motion clone</div>
+  <div class="lab">Prompt (optional)</div>
+  <textarea id="prompt" placeholder="Leave empty: a prompt is written for you from the image and the video"></textarea>
+  <label class="chk"><input type="checkbox" id="meher" checked> Meher canon (24 years old)</label>
+  <label class="chk"><input type="checkbox" id="finish" checked> Phone finish (sharpen + fine grain)</label>
+  <label class="chk"><input type="checkbox" id="fast"> Fast quality (4 steps)</label>
+  <div class="lab">Seed</div><input type="number" id="seed" value="7" min="0" step="1">
+  <button class="go" id="go">Add video and image</button>
+  <div class="note">Opens a GitHub form with your settings filled in. Drag your <b>video</b> and <b>image</b> into it and press <b>Create</b>. The job starts on Kaggle within a minute and shows up here.<br>Uploads are public in this repo.</div>
+  <div class="lab">Runs</div><div class="hist" id="hist">Loading…</div>
+</section>
+<section class="mid">
+  <div class="lab" style="margin-top:0" id="title">Pipeline (set up automatically)</div>
+  <div class="nodes" id="nodes"></div>
+  <div class="plan" id="plan"></div>
+  <div class="lab">Log</div><pre id="log">Pick a run, or start a new one.</pre>
+</section>
+<section>
+  <div class="lab" style="margin-top:0">Final output</div>
+  <div class="player" id="player">The finished video plays here</div>
+  <label class="chk"><input type="checkbox" id="side"> Side by side with the driving video</label>
+  <div class="grid2" id="mets"></div>
+  <div class="row" id="dl"></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const STEPS=["Analyse","Prompt","Pose + generate","Join","Finish","Score"];
+const DESC={"Analyse":"size, fps, audio, cuts, plan","Prompt":"yours or written by AI","Pose + generate":"pose, face, chained windows","Join":"seamless joins per scene","Finish":"original size, fps, length, audio","Score":"face, motion, mouth, QC"};
+let C,cur=null,timer=null,issues=[];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function nodes(steps){const s=steps&&steps.length?steps:STEPS.map(n=>({name:n,state:'waiting',detail:''}));
+  $('nodes').innerHTML=s.map((x,i)=>`<div class="node ${x.state}"><b>${i+1} ${x.name}</b><div class="d">${esc(x.detail||DESC[x.name])}</div><div class="s">${x.state}</div>${x.state=='running'?'<div class="bar"><i></i></div>':''}</div>`).join('');}
+nodes();
+$('go').onclick=()=>{const q=new URLSearchParams({template:'job.yml',title:'Motion clone',prompt:$('prompt').value,seed:$('seed').value});
+  const o=[];if($('meher').checked)o.push('Meher canon');if($('finish').checked)o.push('Phone finish');if($('fast').checked)o.push('Fast quality');
+  q.set('title','Motion clone'+(o.length?' ('+o.join(', ')+')':''));
+  window.open(`https://github.com/${C.repo}/issues/new?`+q.toString(),'_blank');
+  setTimeout(()=>alert('In the GitHub form: drag your video and image in, tick the same options ('+(o.join(', ')||'none')+'), then press Create.'),300);
+  setTimeout(hist,60000)};
+async function hist(){try{const r=await fetch(`https://api.github.com/repos/${C.repo}/issues?labels=job&state=all&per_page=30`);issues=await r.json();
+  if(!Array.isArray(issues))throw 0;
+  $('hist').innerHTML=issues.map(i=>`<a href="#job-${i.number}" class="${cur==i.number?'on':''}"><span>#${i.number} ${esc(i.title)}</span><span>${i.state=='closed'?'done':'open'}</span></a>`).join('')||'<span style="color:var(--tx3)">None yet</span>';
+  if(!cur&&issues.length)location.hash='job-'+issues[0].number;}catch(e){$('hist').textContent='Could not load runs (GitHub rate limit). Retry in a few minutes.'}}
+function pick(){const m=location.hash.match(/job-(\d+)/);if(!m)return;cur=+m[1];$('title').textContent='Run #'+cur;
+  document.querySelectorAll('.hist a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')=='#job-'+cur));
+  $('player').textContent='The finished video plays here';$('mets').innerHTML='';$('dl').innerHTML='';
+  clearInterval(timer);poll();timer=setInterval(poll,15000)}
+window.onhashchange=pick;
+async function poll(){if(!cur)return;let s=null;
+  try{const t=await (await fetch(`https://ntfy.sh/mcs-${C.topic_salt}-${cur}/json?poll=1&since=all`)).text();
+    const lines=t.trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)).filter(x=>x.event=='message');
+    if(lines.length)s=JSON.parse(lines[lines.length-1].message)}catch(e){}
+  if(!s){$('state').textContent='waiting';$('log').textContent='Waiting for the Kaggle worker to start (setup takes ~10 min: ComfyUI + 16 GB of models).';nodes();return}
+  nodes(s.steps);const p=s.plan||{};
+  $('plan').textContent=p.render?`Render ${p.render[0]}x${p.render[1]} · ${p.scenes.length} scene(s) · ${p.windows} window(s) · estimate ${p.estimate_min} min (laptop speed; T4 ~2x)`+(p.eta_min!=null?` · about ${p.eta_min} min left`:'')+(p.prompt?`\nPrompt: ${p.prompt}`:''):'';
+  $('log').textContent=(s.log||[]).join('\n')+(s.error?'\n\nError: '+s.error:'');$('log').scrollTop=1e9;$('state').textContent=s.state;
+  if(s.state=='done'){show(s);clearInterval(timer)}if(s.state=='failed')clearInterval(timer)}
+function show(s){const base=`https://github.com/${C.repo}/releases/download/job-${cur}/`,f=$('side').checked?'compare.mp4':'final.mp4';
+  $('player').innerHTML=`<div style="width:100%"><video src="${base}${f}" controls autoplay loop playsinline muted></video><div class="note" id="pv">If the preview stays black, the release file is still uploading - it appears a minute after the run ends.</div></div>`;
+  const sc=s.scores||{},m=(k,n)=>`<div class="met"><span>${n}</span><b>${sc[k]==null?'–':esc(sc[k])}</b></div>`;
+  $('mets').innerHTML=m('face','Face match')+m('motion','Motion copy')+m('mouth','Mouth copy')+m('qc','Video QC');
+  $('dl').innerHTML=`<a class="btn" href="${base}final.mp4">Download</a><a class="btn" href="${base}compare.mp4">Side by side</a><a class="btn" href="https://github.com/${C.repo}/issues/${cur}" target="_blank">Issue</a>`;window._s=s}
+$('side').onchange=()=>{if(window._s)show(window._s)};
+fetch('config.json').then(r=>r.json()).then(c=>{C=c;hist().then(pick)});
+</script></body></html>
