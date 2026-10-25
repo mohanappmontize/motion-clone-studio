@@ -120,7 +120,7 @@ def gpu_wait():
         try: fcntl.flock(lk, fcntl.LOCK_EX | fcntl.LOCK_NB); break
         except BlockingIOError: pass
         ST["state"] = "queued"; save(); time.sleep(15)
-    while subprocess.run(["bash", "-c", "ss -ltn | grep -q ':8188 ' || pgrep -f meher_animate_phased.py >/dev/null"]).returncode == 0:
+    while subprocess.run(["bash", "-c", "ss -ltn | grep -q ':8188 ' || pgrep -f '[m]eher_animate_phased.py' >/dev/null"]).returncode == 0:
         if ST["state"] != "waiting for GPU": ST["state"] = "waiting for GPU"; log("another GPU job is running - waiting")
         time.sleep(20)
     return lk
