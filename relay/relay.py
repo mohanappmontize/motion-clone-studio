@@ -37,10 +37,16 @@ def first_url(text):
     return m.group(1) if m else None
 
 def download(url, dst):
-    tok = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True).stdout.strip()
-    req = urllib.request.Request(url, headers={"Authorization": f"token {tok}"} if "github.com" in url else {})
-    with urllib.request.urlopen(req, timeout=300) as r, open(dst, "wb") as f: shutil.copyfileobj(r, f)
-    return r.headers.get("Content-Type", "")
+    """public first (release / user-attachments of a public repo); retry with the gh token if GitHub says no."""
+    import urllib.error
+    for auth in (False, True):
+        h = {"User-Agent": "mcs-relay"}
+        if auth: h["Authorization"] = "token " + subprocess.run(["gh", "auth", "token"], capture_output=True, text=True).stdout.strip()
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=h), timeout=300) as r, open(dst, "wb") as f:
+                shutil.copyfileobj(r, f); return r.headers.get("Content-Type", "")
+        except urllib.error.HTTPError as e:
+            if auth or e.code not in (401, 403, 404): raise
 
 def vision(img, q):
     code = ("import sys,json;sys.path.insert(0,%r);import jarvis_look;"
